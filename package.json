@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "transform": {}
   },
   "repository": {
     "type": "git",
@@ -15,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/ddang9390/Web-Crawler/issues"
   },
-  "homepage": "https://github.com/ddang9390/Web-Crawler#readme"
+  "homepage": "https://github.com/ddang9390/Web-Crawler#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
