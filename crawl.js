@@ -17,7 +17,7 @@ function getURLsFromHTML(htmlBody, baseURL){
 
     let anchors = dom.window.document.querySelectorAll('a');
     let URLs = [];
-    
+
     anchors.forEach(a => {
         URLs.push(new URL(a.getAttribute('href'), baseURL).href)
     });
@@ -25,51 +25,45 @@ function getURLsFromHTML(htmlBody, baseURL){
     return URLs;
 }
 
-function crawlPage(url){
-    fetch(url).then(resp =>{
-        if (resp.status >= 400){
-            console.log("Could not access page");
-            return;
-        }
-        if (resp.headers.get("content-type").split(";")[0] != "text/html"){
-           console.log("Could not read contents");
-           return;
-        }
-        return resp.body;
-    }).then((rb) => {
-        const reader = rb.getReader();
+async function crawlPage(baseURL, currentURL = baseURL, pages = {}){
+    let url1 = new URL(baseURL);
+    let url2 = new URL(currentURL);
 
-        return new ReadableStream({
-        start(controller) {
-            // The following function handles each data chunk
-            function push() {
-            // "done" is a Boolean and value a "Uint8Array"
-            reader.read().then(({ done, value }) => {
-                // If there is no more data to read
-                if (done) {
-                console.log("done", done);
-                controller.close();
-                return;
-                }
-                // Get the data and send it to the browser via the controller
-                controller.enqueue(value);
-                // Check chunks by logging to the console
-                console.log(done, value);
-                push();
-            });
-            }
+    if(url1.hostname != url2.hostname){
+        return pages;
+    }
+    let curr = normalizeURL(currentURL);
+    if(curr in pages){
+        pages[curr]++;
+        return pages;
+    }
+    else{
+        pages[curr] = 1;
+    }
+    let URLs = [];
 
-            push();
-        },
-        });
-    })
-    .then((stream) =>
-        // Respond with our stream
-        new Response(stream, { headers: { "Content-Type": "text/html" } }).text(),
-    )
-    .then((result) => {
-        // Do things with result
-        console.log(result);
-    });
+    let resp;
+    try{
+        resp = await fetch(currentURL);
+    } catch (error){
+        console.log(currentURL + " " + error);
+        return;
+    }
+    if (resp.status >= 400){
+        console.log(currentURL + " " + "Could not access page");
+        return;
+    }
+    if (!resp.headers.get("content-type").includes("text/html")){
+        console.log(currentURL + " " + "Could not read contents");
+        return;
+    }
+
+    URLs = getURLsFromHTML(await resp.text(), currentURL);
+
+    for(const url of URLs){
+        await crawlPage(baseURL, url, pages);
+    }
+
+    return pages;
 
 }

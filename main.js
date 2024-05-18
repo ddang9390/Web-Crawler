@@ -1,16 +1,14 @@
 import { crawlPage } from "./crawl.js";
 
-function main(){
+async function main(){
     const args = process.argv.slice(2);
 
-    if (args.length < 1 || args.length > 1){
-        console.log("Please include just one argument");
+    if (args.length < 1 || args.length > 2){
+        console.log("Please include one or two arguments");
     }
     else{
-        args.forEach(val => {
-            crawlPage(val);
-
-        });
+        const pages = await crawlPage(args[0], args[1])
+        console.log(pages);
     }
 }
 
