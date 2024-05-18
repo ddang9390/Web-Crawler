@@ -1,4 +1,5 @@
 import { crawlPage } from "./crawl.js";
+import { printReport } from "./report.js";
 
 async function main(){
     const args = process.argv.slice(2);
@@ -8,7 +9,7 @@ async function main(){
     }
     else{
         const pages = await crawlPage(args[0], args[1])
-        console.log(pages);
+        printReport(pages);
     }
 }
 
